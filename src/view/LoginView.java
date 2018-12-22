@@ -45,28 +45,6 @@ public class LoginView extends JPanel implements ActionListener {
 		initialize();
 	}
 	
-	///////////////////// GETTERS & SETTERS ///////////////////////////////////////////
-	
-	/**
-	 * Retrieves the account field.
-	 * 
-	 * @return
-	 */
-	
-	public JTextField getAccountField() {
-		return accountField;
-	}
-	
-	/**
-	 * Retrieves the PIN field.
-	 * 
-	 * @return
-	 */
-	
-	public JPasswordField getPinField() {
-		return pinField;
-	}
-	
 	///////////////////// INSTANCE METHODS ////////////////////////////////////////////
 	
 	/**
@@ -77,16 +55,6 @@ public class LoginView extends JPanel implements ActionListener {
 	
 	public void updateErrorMessage(String errorMessage) {
 		errorMessageLabel.setText(errorMessage);
-	}
-	
-	/**
-	 * Clears the account and PIN fields, as well as the error message.
-	 */
-	
-	public void clear() {
-		accountField.setText("");
-		pinField.setText("");
-		errorMessageLabel.setText("");
 	}
 	
 	///////////////////// PRIVATE METHODS /////////////////////////////////////////////

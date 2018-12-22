@@ -2,9 +2,12 @@ package view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.Image;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import controller.ViewManager;
@@ -13,7 +16,7 @@ import controller.ViewManager;
 public class HomeView extends JPanel implements ActionListener {
 	
 	private ViewManager manager;		// manages interactions between the views, model, and database
-	
+	private JButton logoutButton;
 	/**
 	 * Constructs an instance (or objects) of the HomeView class.
 	 * 
@@ -42,6 +45,7 @@ public class HomeView extends JPanel implements ActionListener {
 		
 		this.add(new javax.swing.JLabel("HomeView", javax.swing.SwingConstants.CENTER));
 		
+		this.initLogoutButton();
 		// TODO
 		//
 		// this is where you should build the HomeView (i.e., all the components that
@@ -50,7 +54,14 @@ public class HomeView extends JPanel implements ActionListener {
 		// feel free to use my layout in LoginView as an example for laying out and
 		// positioning your components.
 	}
-	
+
+	private void initLogoutButton() {
+        logoutButton = new JButton("LogOut");
+        logoutButton.setBounds(50, 50, 50, 50);
+        logoutButton.addActionListener(this);
+        
+        this.add(logoutButton);
+    }
 	/*
 	 * HomeView is not designed to be serialized, and attempts to serialize will throw an IOException.
 	 * 
@@ -72,7 +83,14 @@ public class HomeView extends JPanel implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		Object source = e.getSource();
 		
+		if (source.equals(logoutButton)) {
+			manager.logout();
+		} else {
+			System.err.println("ERROR: Action command not found (" + e.getActionCommand() + ")");
+		}
+	}
 		// TODO
 		//
 		// this is where you'll setup your action listener, which is responsible for
@@ -80,5 +98,4 @@ public class HomeView extends JPanel implements ActionListener {
 		// user clicking a button, typing in a textfield, etc.).
 		//
 		// feel free to use my action listener in LoginView.java as an example.
-	}
 }

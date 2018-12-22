@@ -39,19 +39,20 @@ public class ViewManager {
 	 */
 	
 	public void login(String accountNumber, char[] pin) {
-		LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
+		String userPin = new String(pin);
 		
-		try {
+		if (accountNumber != null && userPin != null && accountNumber.length() > 0 && userPin.length() > 0) {
 			account = db.getAccount(Long.valueOf(accountNumber), Integer.valueOf(new String(pin)));
 			
 			if (account == null) {
+				LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
 				lv.updateErrorMessage("Invalid account number and/or PIN.");
 			} else {
 				switchTo(ATM.HOME_VIEW);
-				lv.clear();
+				
+				LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
+				lv.updateErrorMessage("");
 			}
-		} catch (NumberFormatException e) {
-			lv.updateErrorMessage("Account numbers and PINs don't have letters.");
 		}
 	}
 	
@@ -88,4 +89,23 @@ public class ViewManager {
 			e.printStackTrace();
 		}
 	}
+	
+	public void logout() {
+        try {            
+            int choice = JOptionPane.showConfirmDialog(
+                views,
+                "Are you sure?",
+                "Shutdown ATM",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+            );
+            
+            if (choice == 0) {
+                account = null;
+                switchTo(ATM.LOGIN_VIEW);
+            }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        }
 }
