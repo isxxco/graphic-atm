@@ -2,11 +2,9 @@ package view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.Image;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -43,7 +41,6 @@ public class HomeView extends JPanel implements ActionListener {
 		// this is a placeholder for this view and should be removed once you start
 		// building the HomeView.
 		
-		this.add(new javax.swing.JLabel("HomeView", javax.swing.SwingConstants.CENTER));
 		
 		this.initLogoutButton();
 		// TODO

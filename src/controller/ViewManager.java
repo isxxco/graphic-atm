@@ -95,7 +95,7 @@ public class ViewManager {
             int choice = JOptionPane.showConfirmDialog(
                 views,
                 "Are you sure?",
-                "Shutdown ATM",
+                "Cancel ATM Creation",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
             );
@@ -108,4 +108,11 @@ public class ViewManager {
 			e.printStackTrace();
 		}
         }
+	
+	public void submit(String accountNumber, char[] pin) {
+		
+		account = db.getAccount(Long.valueOf(accountNumber), Integer.valueOf(new String(pin)));
+			
+			
+	}
 }
