@@ -9,16 +9,13 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.text.ParseException;
 
-import javax.swing.JButton;
-import javax.swing.JFormattedTextField;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.text.MaskFormatter;
 
 import controller.ViewManager;
+import model.BankAccount;
+import model.User;
+
 
 @SuppressWarnings("serial")
 public class CreateView extends JPanel implements ActionListener {
@@ -234,7 +231,7 @@ public class CreateView extends JPanel implements ActionListener {
 	private void addKeyListener(JTextField field, int length) {
 		field.addKeyListener(new KeyAdapter() {
 		    public void keyTyped(KeyEvent e) {
-		        if (field.getText().length() >= length) // limit account number to 9 characters
+		        if (field.getText().length() >= length) 
 		            e.consume();
 		    }
 		});
@@ -265,8 +262,14 @@ public class CreateView extends JPanel implements ActionListener {
 		if (source.equals(logoutButton)) {
 			manager.logout();
 		}
-		else {
-			System.err.println("ERROR: Action command not found (" + e.getActionCommand() + ")");
+		else if (source.equals(submitButton)) {
+			String strDob = dob.getText();
+			String strPhone = phone.getText();
+			int dob = Integer.parseInt(strDob.substring(0,2) + strDob.substring(3,5) + strDob.substring(6,10));
+			int phone = Integer.parseInt(strPhone.substring(1,4) + strPhone.substring(6,9) + strPhone.substring(10, 14));
+			User tempUser = new User(Integer.parseInt(String.valueOf(pinField.getPassword())), dob, phone, fName.getText(), lName.getText(), address.getText(), city.getText(), state.getText(), zip.getText());
+			BankAccount tempAccount = new BankAccount('Y', manager.getMaxAccountNumber() + 1, 0.0, tempUser);
+			manager.addAccount(tempAccount);
 		}
 		// TODO
 		//

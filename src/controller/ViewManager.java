@@ -2,13 +2,13 @@ package controller;
 
 import java.awt.CardLayout;
 import java.awt.Container;
+import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
 
 import data.Database;
 import model.BankAccount;
-import view.ATM;
-import view.LoginView;
+import view.*;
 
 public class ViewManager {
 	
@@ -114,5 +114,30 @@ public class ViewManager {
 		account = db.getAccount(Long.valueOf(accountNumber), Integer.valueOf(new String(pin)));
 			
 			
+	}
+
+	public long getMaxAccountNumber() {
+		try {
+			return db.getMaxAccountNumber();
+		} catch (SQLException e) {
+			return -1;
+		}
+	}
+
+	public void addAccount(BankAccount account) {
+		db.insertAccount(account);
+		login(String.valueOf(account.getAccountNumber()), String.valueOf(account.getUser().getPin()).toCharArray());
+	}
+
+	public int deposit(double amount) {
+		return account.deposit(amount);
+	}
+
+	public int withdraw(double amount) {
+		return account.withdraw(amount);
+	}
+	
+	public BankAccount getAccount() {
+		return account;
 	}
 }
