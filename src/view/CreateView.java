@@ -1,37 +1,48 @@
 package view;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.text.ParseException;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.stream.IntStream;
 
-import javax.swing.*;
-import javax.swing.text.MaskFormatter;
-
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import controller.ViewManager;
 import model.BankAccount;
 import model.User;
-
 
 @SuppressWarnings("serial")
 public class CreateView extends JPanel implements ActionListener {
 	
 	private ViewManager manager;		// manages interactions between the views, model, and database
-	private JButton logoutButton;
-	private JTextField fName;
-	private JTextField lName;
-	private JTextField address;
-	private JTextField city;
-	private JTextField state;
-	private JTextField zip;
-	private JFormattedTextField dob;
-	private JTextField phone;
-	private JPasswordField pinField;
-	private JButton submitButton;
+	private JTextField FnameField;
+	private JTextField LnameField;
+	private JTextField PhoneField;
+	private JTextField StreetField;
+	private JComboBox<String> first;
+	private JComboBox<String> second;
+	private JComboBox<String> third;
+	private JTextField CityField;
+	private JComboBox<String> initial;
+	private JTextField ZipField;
+	private JTextField APhoneField;
+	private JTextField BPhoneField;
+	private JPasswordField PINField;
+	private JButton CancelButton;
+	private JButton CreateButton;
+	private JLabel errorLabel;	
+	
 	/**
 	 * Constructs an instance (or object) of the CreateView class.
 	 * 
@@ -42,6 +53,7 @@ public class CreateView extends JPanel implements ActionListener {
 		super();
 		
 		this.manager = manager;
+		this.errorLabel = new JLabel("", SwingConstants.CENTER);
 		initialize();
 	}
 	
@@ -52,190 +64,201 @@ public class CreateView extends JPanel implements ActionListener {
 	 */
 	
 	private void initialize() {
-		
-		// TODO
-		//
-		// this is a placeholder for this view and should be removed once you start
-		// building the CreateView.
 		this.setLayout(null);
 		
-		this.initFnameField();
-		this.initLnameField();
-		this.initAddressField();
-		this.initCityField();
-		this.initStateField();
-		this.initZipField();
-		this.initDobField();
-		this.initPhoneField();
-		this.initPinField();
-		this.initLogoutButton();
-		this.initSubmitButton();
+		initFnameField();
+		initLnameField();
+		initPhoneField();
+		initAPhoneField();
+		initBPhoneField();
+		initStreetField();
+		initBirthdayField();
+		initCityField();
+		initStateField();
+		initZipField();
+		initPINField();
+		initCancelButton();
+		initCreateButton();
+		initErrorLabel();
 		
-		// TODO
-		//
-		// this is where you should build the CreateView (i.e., all the components that
-		// allow the user to enter his or her information and create a new account).
-		//
-		// feel free to use my layout in LoginView as an example for laying out and
-		// positioning your components.
+		errorLabel = new JLabel();
+		errorLabel.setText("You are missing a required field!");
+		this.add(errorLabel);
 	}
 	
 	private void initFnameField() {
-		JLabel label = new JLabel("FirstName", SwingConstants.LEFT);
-		label.setBounds(100, 60, 95, 35);
-		label.setLabelFor(fName);
+		JLabel label = new JLabel("First Name", SwingConstants.RIGHT);
+		label.setBounds(100, 10, 95, 35);
+		label.setLabelFor(FnameField);
 		label.setFont(new Font("DialogInput", Font.BOLD, 14));
 		
-		fName = new JTextField(20);
-		fName.setBounds(205, 60, 200, 35);
+		FnameField = new JTextField(25);
+		FnameField.setBounds(205, 10, 200, 35);
 		
 		this.add(label);
-		this.add(fName);
+		this.add(FnameField);
 	}
 	
+	//x, y, width, height starts at 0,0 top left
+
 	private void initLnameField() {
-		JLabel label = new JLabel("LastName", SwingConstants.LEFT);
-		label.setBounds(100, 100, 95, 35);
-		label.setLabelFor(lName);
+		JLabel label = new JLabel("Last Name", SwingConstants.RIGHT);
+		label.setBounds(100, 50, 95, 35);
+		label.setLabelFor(LnameField);
 		label.setFont(new Font("DialogInput", Font.BOLD, 14));
 		
-		lName = new JTextField(20);
-		lName.setBounds(205, 100, 200, 35);
+		LnameField = new JTextField(25);
+		LnameField.setBounds(205, 50, 200, 35);
 		
 		this.add(label);
-		this.add(lName);
+		this.add(LnameField);
 	}
 	
-	private void initAddressField() {
-		JLabel label = new JLabel("Address", SwingConstants.LEFT);
-		label.setBounds(100, 140, 95, 35);
-		label.setLabelFor(address);
+	private void initBirthdayField() {
+		JLabel label = new JLabel("Birthdate", SwingConstants.RIGHT);
+		label.setBounds(100, 90, 95, 35);
+		label.setLabelFor(first);
 		label.setFont(new Font("DialogInput", Font.BOLD, 14));
-		
-		address = new JTextField(20);
-		address.setBounds(205, 140, 200, 35);
-		
 		this.add(label);
-		this.add(address);
-	}
-	
-	private void initCityField() {
-		JLabel label = new JLabel("City", SwingConstants.LEFT);
-		label.setBounds(100, 180, 95, 35);
-		label.setLabelFor(city);
-		label.setFont(new Font("DialogInput", Font.BOLD, 14));
 		
-		city = new JTextField(20);
-		city.setBounds(205, 180, 200, 35);
+		String[] months = { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12" };
+		first = new JComboBox<String>(months);
+		first.setBounds(205, 90, 95, 35);
+		this.add(first);
+		first.setVisible(true);
 		
-		this.add(label);
-		this.add(city);
-	}
-	
-	private void initStateField() {
-		JLabel label = new JLabel("State", SwingConstants.LEFT);
-		label.setBounds(100, 220, 95, 35);
-		label.setLabelFor(state);
-		label.setFont(new Font("DialogInput", Font.BOLD, 14));
+		String[] days = { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31" };
+		second = new JComboBox<String>(days);
+		second.setBounds(300, 90, 50, 35);
+		this.add(second);
+		second.setVisible(true);
 		
-		state = new JTextField(20);
-		state.setBounds(205, 220, 200, 35);
-		
-		this.add(label);
-		this.add(state);
-	}
-	
-	private void initZipField() {
-		JLabel label = new JLabel("ZIP", SwingConstants.LEFT);
-		label.setBounds(100, 260, 95, 35);
-		label.setLabelFor(zip);
-		label.setFont(new Font("DialogInput", Font.BOLD, 14));
-		
-		zip = new JTextField(20);
-		zip.setBounds(205, 260, 200, 35);
-		
-		this.add(label);
-		this.add(zip);
-	}
-	
-	private void initDobField() {
-		JLabel label = new JLabel("Date of Birth", SwingConstants.RIGHT);
-		label.setBounds(100, 300, 95, 35);
-
-	    try {
-			MaskFormatter dateFormat = new MaskFormatter("##/##/####");
-			dateFormat.setPlaceholderCharacter('_');
-			dob = new JFormattedTextField(dateFormat);
-		} catch (ParseException e) {
-			dob.setText("");
-		}
-		dob.setBounds(205, 300, 200, 35);
-
-		this.add(label);
-	    this.add(dob);
-		/**JLabel label = new JLabel("DOB", SwingConstants.LEFT);
-		label.setBounds(100, 340, 95, 35);
-		label.setLabelFor(dob);
-		label.setFont(new Font("DialogInput", Font.BOLD, 14));
-		
-		dob = new JTextField(20);
-		dob.setBounds(205, 340, 200, 35);
-		
-		this.add(label);
-		this.add(dob);**/
+		int[] years = IntStream.range(1900, 2019).toArray();
+		String[] stringYears = Arrays.toString(years).split("[\\[\\]]")[1].split(",");
+		third = new JComboBox<String>(stringYears);
+		third.setBounds(350, 90, 95, 35);
+		this.add(third);
+		third.setVisible(true);
 	}
 	
 	private void initPhoneField() {
-		JLabel label = new JLabel("PHONE", SwingConstants.LEFT);
-		label.setBounds(100, 340, 95, 35);
-		label.setLabelFor(phone);
+		JLabel label = new JLabel("Phone", SwingConstants.RIGHT);
+		label.setBounds(100, 130, 95, 35);
+		label.setLabelFor(PhoneField);
 		label.setFont(new Font("DialogInput", Font.BOLD, 14));
 		
-		phone = new JTextField(20);
-		phone.setBounds(205, 340, 200, 35);
+		PhoneField = new JTextField(20);
+		PhoneField.setBounds(205, 130, 30, 35);
 		
 		this.add(label);
-		this.add(phone);
+		this.add(PhoneField);
 	}
 	
-	private void initPinField() {
-		JLabel label = new JLabel("PIN", SwingConstants.LEFT);
-		label.setBounds(100, 380, 95, 35);
-		label.setLabelFor(pinField);
+	private void initAPhoneField() {
+		APhoneField = new JTextField(20);
+		APhoneField.setBounds(245, 130, 30, 35);
+		
+		this.add(APhoneField);
+	}
+	
+	private void initBPhoneField() {
+		BPhoneField = new JTextField(20);
+		BPhoneField.setBounds(285, 130, 40, 35);
+		
+		this.add(BPhoneField);
+	}
+	
+	private void initStreetField() {
+		JLabel label = new JLabel("Address", SwingConstants.RIGHT);
+		label.setBounds(100, 170, 95, 35);
+		label.setLabelFor(StreetField);
 		label.setFont(new Font("DialogInput", Font.BOLD, 14));
 		
-		pinField = new JPasswordField(20);
-		pinField.setBounds(205, 380, 200, 35);
-		addKeyListener(pinField, 4);
+		StreetField = new JTextField(30);
+		StreetField.setBounds(205, 170, 200, 35);
 		
 		this.add(label);
-		this.add(pinField);
+		this.add(StreetField);
 	}
 	
-	private void initLogoutButton() {
-        logoutButton = new JButton("Cancel");
-        logoutButton.setBounds(50, 420, 100, 50);
-        logoutButton.addActionListener(this);
-        
-        this.add(logoutButton);
-    }
-	
-	private void initSubmitButton() {	
-		submitButton = new JButton("Login");
-		submitButton.setBounds(160, 420, 100, 50);
-		submitButton.addActionListener(this);
+	private void initCityField() {
+		JLabel label = new JLabel("City", SwingConstants.RIGHT);
+		label.setBounds(100, 210, 95, 35);
+		label.setLabelFor(CityField);
+		label.setFont(new Font("DialogInput", Font.BOLD, 14));
 		
-		this.add(submitButton);
+		CityField = new JTextField(30);
+		CityField.setBounds(205, 210, 200, 35);
+		
+		this.add(label);
+		this.add(CityField);
 	}
 	
-	private void addKeyListener(JTextField field, int length) {
-		field.addKeyListener(new KeyAdapter() {
-		    public void keyTyped(KeyEvent e) {
-		        if (field.getText().length() >= length) 
-		            e.consume();
-		    }
-		});
+	private void initStateField() {
+		JLabel label = new JLabel("State", SwingConstants.RIGHT);
+		label.setBounds(100, 250, 95, 35);
+		label.setLabelFor(initial);
+		label.setFont(new Font("DialogInput", Font.BOLD, 14));
+		this.add(label);
+		
+		String[] states = { "AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY" };
+		initial = new JComboBox<String>(states);
+		initial.setBounds(205, 250, 200, 35);
+		this.add(initial);
+		initial.setVisible(true);
 	}
+	
+	private void initZipField() {
+		JLabel label = new JLabel("ZIP", SwingConstants.RIGHT);
+		label.setBounds(100, 290, 95, 35);
+		label.setLabelFor(ZipField);
+		label.setFont(new Font("DialogInput", Font.BOLD, 14));
+		
+		ZipField = new JTextField(30);
+		ZipField.setBounds(205, 290, 200, 35);
+		
+		this.add(label);
+		this.add(ZipField);
+	}
+	
+	private void initPINField() {
+		JLabel label = new JLabel("PIN", SwingConstants.RIGHT);
+		label.setBounds(100, 330, 95, 35);
+		label.setLabelFor(PINField);
+		label.setFont(new Font("DialogInput", Font.BOLD, 14));
+		
+		PINField = new JPasswordField();
+	    PINField.setEchoChar('*');
+		PINField.setBounds(205, 330, 50, 35);
+		
+		this.add(label);
+		this.add(PINField);
+	}
+	
+	private void initCancelButton() {	
+		CancelButton = new JButton("Cancel");
+		CancelButton.setBounds(305, 370, 100, 35);
+		CancelButton.addActionListener(this);
+		
+		this.add(CancelButton);
+	}
+	
+	private void initCreateButton() {	
+		CreateButton = new JButton("Confirm");
+		CreateButton.setBounds(205, 370, 100, 35);
+		CreateButton.addActionListener(this);
+		
+		this.add(CreateButton);
+	}
+	
+	private void initErrorLabel() {
+		errorLabel.setBounds(250, 400, 100, 35);
+		errorLabel.setFont(new Font("DialogInput", Font.ITALIC, 14));
+		errorLabel.setForeground(Color.RED);
+		
+		this.add(errorLabel);
+	}
+	
 	/*
 	 * CreateView is not designed to be serialized, and attempts to serialize will throw an IOException.
 	 * 
@@ -254,29 +277,75 @@ public class CreateView extends JPanel implements ActionListener {
 	 * 
 	 * @param e
 	 */
+	//private Database db;
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 		
-		if (source.equals(logoutButton)) {
-			manager.logout();
+		if (source.equals(CreateButton)) {
+			String firstName = FnameField.getText();
+			String lastName = LnameField.getText();
+			String phone = PhoneField.getText() + APhoneField.getText() + BPhoneField.getText();
+			String street = StreetField.getText();
+			String month = first.getSelectedItem().toString();
+			String date = second.getSelectedItem().toString();
+			String year = third.getSelectedItem().toString();
+			String dob = year.substring(1) + month + date;
+			String city = CityField.getText();
+			String zipcode = ZipField.getText();
+			String state = initial.getSelectedItem().toString();
+			String pinNumber = new String(PINField.getPassword());
+			boolean create = true;
+
+			if (firstName.equals("") || lastName.equals("") || firstName.length() > 15 || lastName.length() > 20) {
+				errorLabel.setText("Incorrect name input. First Name: 1 character MIN - 15 character MAX. Last Name: 1 character MIN - 20 character MAX.");
+				create = false;
+			}
+			if (month.equals("") || date.equals("") || year.equals("")) {
+				errorLabel.setText("Please select a birthdate.");
+				create = false;
+			}
+			
+			if(phone.length() != 10 || phone.matches("[a-zA-Z]+")) {
+				errorLabel.setText("Please enter a 10 digit phone number.");
+				create = false;
+			}
+			if (street.equals("") || city.equals("") || state.equals("") || zipcode.equals("") || zipcode.matches("[a-zA-Z]+")) {
+				errorLabel.setText("Please enter all components of your address.");
+				create = false;
+			}
+			
+			if (pinNumber.equals("") || pinNumber.length() > 4 || pinNumber.matches("[a-zA-Z]+")) {
+				errorLabel.setText("Please enter a 4 digit numerical PIN.");
+				create = false;
+			}
+			
+			long num = 0;
+			try {
+				num = manager.maxAccountNumber() + 1;
+			} 
+			catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			
+			if (create) {
+				User user = new User(Integer.parseInt(pinNumber), Integer.parseInt(dob), Long.parseLong(phone), firstName, lastName, street, city, state, zipcode);
+				BankAccount acc = new BankAccount('Y', num, 0, user);
+				manager.insertAccountFR(acc);
+				JOptionPane.showMessageDialog(null, "Welcome to the Bank! Your account number is " + num + " and your PIN is " + pinNumber + ". Please record in a secure location.");
+				this.removeAll();
+				initialize();
+			}
+			
+			manager.switchTo(ATM.LOGIN_VIEW);
 		}
-		else if (source.equals(submitButton)) {
-			String strDob = dob.getText();
-			String strPhone = phone.getText();
-			int dob = Integer.parseInt(strDob.substring(0,2) + strDob.substring(3,5) + strDob.substring(6,10));
-			int phone = Integer.parseInt(strPhone.substring(1,4) + strPhone.substring(6,9) + strPhone.substring(10, 14));
-			User tempUser = new User(Integer.parseInt(String.valueOf(pinField.getPassword())), dob, phone, fName.getText(), lName.getText(), address.getText(), city.getText(), state.getText(), zip.getText());
-			BankAccount tempAccount = new BankAccount('Y', manager.getMaxAccountNumber() + 1, 0.0, tempUser);
-			manager.addAccount(tempAccount);
+		else if (e.getActionCommand().equals("Cancel")) {
+			this.removeAll();
+			initialize();
+			manager.switchTo(ATM.LOGIN_VIEW);
+		} else {
+			System.err.println("ERROR: Action command not found (" + e.getActionCommand() + ")");
 		}
-		// TODO
-		//
-		// this is where you'll setup your action listener, which is responsible for
-		// responding to actions the user might take in this view (an action can be a
-		// user clicking a button, typing in a textfield, etc.).
-		//
-		// feel free to use my action listener in LoginView.java as an example.
 	}
 }

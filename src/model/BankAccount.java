@@ -14,6 +14,7 @@ public class BankAccount {
 	private long accountNumber;		// account number (a 9-digit number)
 	private double balance;			// account balance (restricted to two places after the decimal)
 	private User user;				// account holder (see User class)
+	private BankAccount account;
 		
 	/**
 	 * Constructs an instance (or object) of the BankAccount class.
@@ -151,7 +152,7 @@ public class BankAccount {
 	 */
 	
 	public int transfer(BankAccount destination, double amount) {
-		if (destination == null) {
+		if (destination == null || destination.getStatus() == 'N') {
 			return ATM.ACCOUNT_NOT_FOUND;
 		} else {
 			int status = this.withdraw(amount);
@@ -183,6 +184,9 @@ public class BankAccount {
 	 * 
 	 * @return
 	 */
+	public String getFBalance() {
+		return NumberFormat.getCurrencyInstance(Locale.US).format(balance);
+	}
 	
 	@Override
 	public String toString() {

@@ -5,27 +5,27 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import controller.ViewManager;
+import model.BankAccount;
 
 @SuppressWarnings("serial")
 public class HomeView extends JPanel implements ActionListener {
 	
 	private ViewManager manager;		// manages interactions between the views, model, and database
-	/*a welcome message unique to the user (first and last name)
-a label indicating the user's current account balance (formatted as $###,###.##)
-a button to initiate a deposit
-a button to initiate a withdrawal
-a button to initiate a transfer
-a button to view/edit his or her personal information
-a button to close the account
-a button to logout*/
-	private JLabel accountMessage;
-	private JButton depositButton;
-	private JButton withdrawButton;
-	private JButton transferButton;
 	private JButton logoutButton;
+	private JButton DepositButton;
+	private JButton WithdrawlButton;
+	private JButton TransferButton;
+	private JButton CloseButton;
+	private JButton InfoButton;
+	private JLabel infoLabel;
+	private BankAccount account;
+	private JLabel welcomeMessage;
 
 	/**
 	 * Constructs an instance (or objects) of the HomeView class.
@@ -40,6 +40,14 @@ a button to logout*/
 		initialize();
 	}
 	
+	public void setMessage (BankAccount account) {
+		this.account = account;
+		if (this.account != null) {
+			welcomeMessage.setText("Hello " + account.getUser().getFirstName() + " "  + account.getUser().getLastName() + "! What can I help you with?");
+			infoLabel.setText("Account Number: " + account.getAccountNumber() + " | " + "Balance: " + account.getFBalance());
+		} 
+	}
+	
 	///////////////////// PRIVATE METHODS /////////////////////////////////////////////
 	
 	/*
@@ -48,60 +56,79 @@ a button to logout*/
 	
 	private void initialize() {
 		this.setLayout(null);
-		// TODO
-		//
-		// this is a placeholder for this view and should be removed once you start
-		// building the HomeView.
-		// temp thing
-		this.initAccountMessage();
 		
-		// TODO
-		//
-		// this is where you should build the HomeView (i.e., all the components that
-		// allow the user to interact with the ATM - deposit, withdraw, transfer, etc.).
-		//
-		// feel free to use my layout in LoginView as an example for laying out and
-		// positioning your components.
-		this.initLogoutButton();
-		this.initDepositButton();
-		this.initWithdrawButton();
-		this.initTransferButton();
-	}
-
-	private void initAccountMessage() {
-		accountMessage = new JLabel("", SwingConstants.CENTER);
-		accountMessage.setBounds(50, 50, 500, 50);
-		this.add(accountMessage);
-	}
-
-	private void initWithdrawButton () {
-		withdrawButton = new JButton("Withdraw");
-		withdrawButton.setBounds(200, 100, 100, 100);
-		withdrawButton.addActionListener(this);
-		this.add(withdrawButton);
+		initDepositButton();
+		initWithdrawlButton();
+		initTransferButton();
+		initInfoButton();
+		initCloseButton();
+		initLogoutButton();
+		initInfoLabel();
+		initwelcomeMessage();
 	}
 	
-	private void initDepositButton() {
-		depositButton = new JButton("Deposit");
-		depositButton.setBounds(50, 100, 100, 100);
-		depositButton.addActionListener(this);
-		this.add(depositButton);
+	private void initDepositButton() {	
+		DepositButton = new JButton("Deposit");
+		DepositButton.setBounds(20, 10, 120, 35);
+		DepositButton.addActionListener(this);
+		
+		this.add(DepositButton);
 	}
-
-	private void initTransferButton() {
-		transferButton = new JButton("Transfer");
-		transferButton.setBounds(50, 250, 100, 100);
-		transferButton.addActionListener(this);
-		this.add(transferButton);
+	
+	private void initWithdrawlButton() {	
+		WithdrawlButton = new JButton("Withdrawl");
+		WithdrawlButton.setBounds(20, 60, 120, 35);
+		WithdrawlButton.addActionListener(this);
+		
+		this.add(WithdrawlButton);
 	}
-
-	private void initLogoutButton() {
+	
+	private void initTransferButton() {	
+		TransferButton = new JButton("Transfer");
+		TransferButton.setBounds(20, 110, 120, 35);
+		TransferButton.addActionListener(this);
+		
+		this.add(TransferButton);
+	}
+	
+	private void initInfoButton() {	
+		InfoButton = new JButton("Personal Info");
+		InfoButton.setBounds(20, 160, 120, 35);
+		InfoButton.addActionListener(this);
+		
+		this.add(InfoButton);
+	}
+	
+	private void initCloseButton() {	
+		CloseButton = new JButton("Close Account");
+		CloseButton.setBounds(20, 210, 120, 35);
+		CloseButton.addActionListener(this);
+		
+		this.add(CloseButton);
+	}
+	
+	private void initLogoutButton() {	
 		logoutButton = new JButton("Log Out");
-		logoutButton.setBounds(5, 5, 100, 50);
+		logoutButton.setBounds(20, 260, 120, 35);
 		logoutButton.addActionListener(this);
+		
 		this.add(logoutButton);
 	}
-
+	
+	private void initwelcomeMessage() {
+		welcomeMessage  = new JLabel("");
+		welcomeMessage.setBounds(150, 10, 300, 35);
+		
+		this.add(welcomeMessage);
+	}
+	
+	private void initInfoLabel() {
+		infoLabel  = new JLabel("");
+		infoLabel.setBounds(150, 50, 300, 35);
+		
+		this.add(infoLabel);
+	}
+	
 	/*
 	 * HomeView is not designed to be serialized, and attempts to serialize will throw an IOException.
 	 * 
@@ -124,61 +151,39 @@ a button to logout*/
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		// TODO
-		//
-		// this is where you'll setup your action listener, which is responsible for
-		// responding to actions the user might take in this view (an action can be a
-		// user clicking a button, typing in a textfield, etc.).
-		//
-		// feel free to use my action listener in LoginView.java as an example.
-		
 		Object source = e.getSource();
 		
-		if (source.equals(logoutButton)) {
-			manager.logout();
+		if (source.equals(DepositButton)) {
+			manager.sendBankAccount(account, "deposit");
+			manager.switchTo(ATM.DEPOSIT_VIEW);
 		}
-		else if (source.equals(withdrawButton)) {
-			withdraw();
-			updateAccountMessage();
+		else if (source.equals(WithdrawlButton)) {
+			manager.sendBankAccount(account, "withdraw");
+			manager.switchTo(ATM.WITHDRAWL_VIEW);
 		}
-		else if (source.equals(depositButton)) {
-			deposit();
-			updateAccountMessage();
+		else if (source.equals(TransferButton)) {
+			manager.sendBankAccount(account, "transfer");
+			manager.switchTo(ATM.TRANSFER_VIEW);
 		}
-		else if (source.equals(transferButton)) {
-			transfer();
-			updateAccountMessage();
+		else if (source.equals(InfoButton)) {
+			manager.sendBankAccount(account, "info");
+			manager.switchTo(ATM.INFORMATION_VIEW);
 		}
-	}
-
-	private void deposit() {
-		try {
-			double amount = Double.parseDouble(JOptionPane.showInputDialog("How much are you depositing?"));
-			if (manager.deposit(amount) != ATM.SUCCESS) {
-				throw new NumberFormatException();
+		else if (source.equals(CloseButton)) {
+			manager.closeAccount();
+			manager.switchTo(ATM.LOGIN_VIEW);
+		}
+		else if (source.equals(logoutButton)) {
+			int choice = JOptionPane.showConfirmDialog(null,"Are you sure you would like to logout?", "Confirmation", JOptionPane.YES_NO_OPTION);
+			if (choice == 0) {
+				manager.switchTo(ATM.LOGIN_VIEW);
+			}
+			else {
+				manager.switchTo(ATM.HOME_VIEW);
 			}
 		}
-		catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(null, "Invalid amount", "Invalid Amount", JOptionPane.ERROR_MESSAGE);
+		else {
+			System.err.println("ERROR: Action command not found (" + e.getActionCommand() + ")");
 		}
-	}
-
-	private void withdraw() {
-		try {
-			double amount = Double.parseDouble(JOptionPane.showInputDialog("How much are you withdrawing?"));
-			if (manager.withdraw(amount) != ATM.SUCCESS) {
-				throw new NumberFormatException();
-			}
-		}
-		catch (NumberFormatException e) {
-			JOptionPane.showMessageDialog(null, "Invalid amount", "Invalid Amount", JOptionPane.ERROR_MESSAGE);
-		}
-	}
-
-	private void transfer() {
-
-	}
-	public void updateAccountMessage() {
-		accountMessage.setText(manager.getAccount().getUser().getFirstName() + " " + manager.getAccount().getUser().getLastName() + "; " + manager.getAccount().getAccountNumber() + "; " + manager.getAccount().getBalance());
 	}
 }
