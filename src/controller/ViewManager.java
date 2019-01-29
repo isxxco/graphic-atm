@@ -9,6 +9,8 @@ import javax.swing.JOptionPane;
 import data.Database;
 import model.BankAccount;
 import view.ATM;
+import view.HomeView;
+import view.InformationView;
 import view.LoginView;
 
 public class ViewManager {
@@ -16,8 +18,8 @@ public class ViewManager {
 	private Container views;				// the collection of all views in the application
 	private Database db;					// a reference to the database
 	private BankAccount account;			// the user's bank account
-	//private BankAccount destination;		// an account to which the user can transfer funds
-
+	private BankAccount destination;		// an account to which the user can transfer funds
+	
 	/**
 	 * Constructs an instance (or object) of the ViewManager class.
 	 * 
@@ -30,33 +32,6 @@ public class ViewManager {
 		this.db = new Database();
 	}
 	
-	public void sendBankAccount(BankAccount account, String view) {
-		switch (view) {
-		case "home":
-			view.HomeView hv = ((view.HomeView) views.getComponents()[ATM.HOME_VIEW_INDEX]);
-			hv.setMessage(account);
-			break;
-		case "deposit":
-			view.DepositView dv = ((view.DepositView) views.getComponents()[ATM.DEPOSIT_VIEW_INDEX]);
-			dv.setMessage(account);
-			break;
-		case "withdraw":
-			view.WithdrawalView wv = ((view.WithdrawalView) views.getComponents()[ATM.WITHDRAWL_VIEW_INDEX]);
-			wv.setMessage(account);
-			break;
-		case "transfer":
-			view.TransferView tv = ((view.TransferView) views.getComponents()[ATM.TRANSFER_VIEW_INDEX]);
-			tv.setMessage(account);
-			break;
-		case "info":
-			view.InformationView iv = ((view.InformationView) views.getComponents()[ATM.INFORMATION_VIEW_INDEX]);
-			iv.setView(account);
-			break;
-		case "manager":
-			this.account = account;
-			break;
-	}
-	}
 	///////////////////// INSTANCE METHODS ////////////////////////////////////////////
 	
 	/**
@@ -65,28 +40,72 @@ public class ViewManager {
 	 * @param accountNumber
 	 * @param pin
 	 */
+
+	public boolean deposit(double amount) {
+		if (account.deposit(amount) == ATM.SUCCESS) {
+			this.updateAccount(account);
+			HomeView hv = ((HomeView) views.getComponents()[ATM.HOME_VIEW_INDEX]);
+			hv.setAccount(account);
+			return true;
+	    } else {
+	    	return false;
+	    	}
+	}
 	
+	public boolean withdraw(double amount) {
+		if (account.withdraw(amount) == ATM.SUCCESS) {
+			this.updateAccount(account);
+			HomeView hv = ((HomeView) views.getComponents()[ATM.HOME_VIEW_INDEX]);
+			hv.setAccount(account);
+			return true;
+	    } else {
+	    	return false;
+	    	}
+	}
+
+	public boolean transfer(long accountNum, double amount) {
+		destination = db.getAccount(accountNum);
+		if (destination == null) {
+			return false;
+		}
+		
+		if (account.transfer(destination, amount)==ATM.SUCCESS && db.updateAccount(account) && db.updateAccount(destination)) {
+			HomeView hv = ((HomeView) views.getComponents()[ATM.HOME_VIEW_INDEX]);
+			hv.setAccount(account);
+			return true;
+		}
+		return false;
+	}
+
 	public void login(String accountNumber, char[] pin) {
 		try {
-			account = (db.getAccount(Long.valueOf(accountNumber), Integer.valueOf(new String(pin))));
+			account = db.getAccount(Long.valueOf(accountNumber), Integer.valueOf(new String(pin)));
 			
-			if (account == null || account.getStatus() == 'N') {
+			if (account == null) {
 				LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
 				lv.updateErrorMessage("Invalid account number and/or PIN.");
-			} 
-			else {
-				sendBankAccount(account, "home");
-				sendBankAccount(account, "withdraw");
-				sendBankAccount(account, "transfer");
-				sendBankAccount(account, "info");
-				switchTo(ATM.HOME_VIEW);
-				
-				LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
-				lv.updateErrorMessage("");
+			} else {
+				if (account.getStatus() == 'N') {
+					LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
+					lv.updateErrorMessage("Account has been closed, sorry!");
+				} else {
+					HomeView hv = ((HomeView) views.getComponents()[ATM.HOME_VIEW_INDEX]);
+					hv.setAccount(account);
+					switchTo(ATM.HOME_VIEW);
+					
+					LoginView lv = ((LoginView) views.getComponents()[ATM.LOGIN_VIEW_INDEX]);
+					lv.updateErrorMessage("");
+				}
 			}
 		} catch (NumberFormatException e) {
 			// ignore
 		}
+	}
+	
+	public void logOut() {
+		account = null;
+		switchTo(ATM.LOGIN_VIEW);
+		
 	}
 	
 	/**
@@ -97,6 +116,12 @@ public class ViewManager {
 	
 	public void switchTo(String view) {
 		((CardLayout) views.getLayout()).show(views, view);
+		
+		if (view.equals(ATM.INFORMATION_VIEW)) {
+			InformationView Iv = ((InformationView) views.getComponents()[ATM.INFORMATION_VIEW_INDEX]);
+			Iv.switchingToInformationView(account);
+
+		}
 	}
 	
 	/**
@@ -122,52 +147,26 @@ public class ViewManager {
 			e.printStackTrace();
 		}
 	}
-	
-	public void closeAccount() {
-		try {			
-			int choice = JOptionPane.showConfirmDialog(
-				views,
-				"Are you sure?",
-				"Close your account",
-				JOptionPane.YES_NO_OPTION,
-				JOptionPane.QUESTION_MESSAGE
-			);
-			
-			if (choice == 0) {
-				db.closeAccount(account);
-				System.exit(0);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
 	public long maxAccountNumber() throws SQLException {
-		return db.getMaxAccountNumber();
+		return db.maxAccountNumber();
 	}
-	public void insertAccountFR(BankAccount acc) {
+	public void insertAccount_wrapp(BankAccount acc) {
 		db.insertAccount(acc);
 	}
-	public BankAccount getAccount() {
-		return account;
+	public boolean updateAccount(BankAccount account) { 
+		if (account.getAccountNumber() == this.account.getAccountNumber()) {
+			this.account = account;
+			HomeView hv = ((HomeView) views.getComponents()[ATM.HOME_VIEW_INDEX]);
+			hv.setAccount(account);
+		}
+		return db.updateAccount(account);
 	}
-	public int deposit(double amount) {
-		return account.deposit(amount);
-	}
-	public int withdraw(double amount) {
-		return account.withdraw(amount);
-	}
-	public void updateAcc(BankAccount destination) {
-		db.updateAccount(account);
-		if (destination != null) db.updateAccount(destination);
-	}
-	public void updateTransAcc() {
-		db.updateAccount(account);
-	}
-	public BankAccount getTransferAccount(long accountNumber) {
-		return db.getAccount(accountNumber);
-	}
-	public int transfer(BankAccount destination, double amount) {
-		return account.transfer(destination, amount);
+	public boolean closeAccount() {
+		if (db.closeAccount(this.account)) {
+			this.logOut();
+			return true;
+		} else {
+			return false;
+		}		
 	}
 }

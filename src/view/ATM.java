@@ -1,3 +1,4 @@
+
 package view;
 
 import java.awt.CardLayout;
@@ -30,12 +31,9 @@ public class ATM extends JFrame {
 	public final static String CREATE_VIEW = "CREATE_VIEW";
 	public final static String HOME_VIEW = "HOME_VIEW";
 	public final static String DEPOSIT_VIEW = "DEPOSIT_VIEW";
-	public final static String WITHDRAWL_VIEW = "WITHDRAWL_VIEW";
+	public final static String WITHDRAW_VIEW = "WITHDRAW_VIEW";
 	public final static String TRANSFER_VIEW = "TRANSFER_VIEW";
 	public final static String INFORMATION_VIEW = "INFORMATION_VIEW";
-
-
-	
 	/*
 	 * Indexes for views as they are stored in CardLayout.
 	 */
@@ -44,9 +42,12 @@ public class ATM extends JFrame {
 	public final static int CREATE_VIEW_INDEX = 1;
 	public final static int HOME_VIEW_INDEX = 2;
 	public final static int DEPOSIT_VIEW_INDEX = 3;
-	public final static int WITHDRAWL_VIEW_INDEX = 4;
+	public final static int WITHDRAW_VIEW_INDEX = 4;
 	public final static int TRANSFER_VIEW_INDEX = 5;
 	public final static int INFORMATION_VIEW_INDEX = 6;
+
+
+
 		
 	/**
 	 * Constructs an instance (or object) of the ATM class.
@@ -67,17 +68,14 @@ public class ATM extends JFrame {
 		ViewManager manager = new ViewManager(views);
 		
 		// add child views to the parent container
-
+		
 		views.add(new LoginView(manager), LOGIN_VIEW);
 		views.add(new CreateView(manager), CREATE_VIEW);
 		views.add(new HomeView(manager), HOME_VIEW);
 		views.add(new DepositView(manager), DEPOSIT_VIEW);
-		views.add(new WithdrawalView(manager), WITHDRAWL_VIEW);
+		views.add(new WithdrawView(manager), WITHDRAW_VIEW);
 		views.add(new TransferView(manager), TRANSFER_VIEW);
 		views.add(new InformationView(manager), INFORMATION_VIEW);
-
-
-		
 		// configure the application frame
 		
 		this.add(views);

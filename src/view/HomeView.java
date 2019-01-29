@@ -5,10 +5,12 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JOptionPane;
 
 import controller.ViewManager;
 import model.BankAccount;
@@ -17,15 +19,19 @@ import model.BankAccount;
 public class HomeView extends JPanel implements ActionListener {
 	
 	private ViewManager manager;		// manages interactions between the views, model, and database
-	private JButton logoutButton;
-	private JButton DepositButton;
-	private JButton WithdrawlButton;
-	private JButton TransferButton;
-	private JButton CloseButton;
-	private JButton InfoButton;
-	private JLabel infoLabel;
 	private BankAccount account;
-	private JLabel welcomeMessage;
+	
+	private JButton logOutButton;
+	private JButton DepositButton;
+	private JButton WithdrawButton;
+	private JButton TransferButton;
+	private JButton InfoButton;
+	private JButton CloseButton;
+
+
+	
+	private JLabel welcomeText;
+	private JLabel InfoText;
 
 	/**
 	 * Constructs an instance (or objects) of the HomeView class.
@@ -35,17 +41,10 @@ public class HomeView extends JPanel implements ActionListener {
 	
 	public HomeView(ViewManager manager) {
 		super();
-		
 		this.manager = manager;
+		
+		this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		initialize();
-	}
-	
-	public void setMessage (BankAccount account) {
-		this.account = account;
-		if (this.account != null) {
-			welcomeMessage.setText("Hello " + account.getUser().getFirstName() + " "  + account.getUser().getLastName() + "! What can I help you with?");
-			infoLabel.setText("Account Number: " + account.getAccountNumber() + " | " + "Balance: " + account.getFBalance());
-		} 
 	}
 	
 	///////////////////// PRIVATE METHODS /////////////////////////////////////////////
@@ -55,80 +54,49 @@ public class HomeView extends JPanel implements ActionListener {
 	 */
 	
 	private void initialize() {
-		this.setLayout(null);
+		Box firstRow = new Box(BoxLayout.X_AXIS);
+		welcomeText = new JLabel("");
+		firstRow.add(welcomeText);
+		firstRow.add(Box.createHorizontalStrut(40));
+		logOutButton = new JButton("Log Out");
+		logOutButton.addActionListener(this);
+		firstRow.add(logOutButton);
+		this.add(firstRow);
 		
-		initDepositButton();
-		initWithdrawlButton();
-		initTransferButton();
-		initInfoButton();
-		initCloseButton();
-		initLogoutButton();
-		initInfoLabel();
-		initwelcomeMessage();
-	}
-	
-	private void initDepositButton() {	
+		Box secondRow = new Box(BoxLayout.X_AXIS);
+		InfoText = new JLabel("");
+		secondRow.add(InfoText);
+		this.add(secondRow);
+		this.add(new Box(BoxLayout.X_AXIS));
+		
+		this.add(Box.createVerticalStrut(50));
+		Box thirdRow = new Box(BoxLayout.X_AXIS);
 		DepositButton = new JButton("Deposit");
-		DepositButton.setBounds(20, 10, 120, 35);
 		DepositButton.addActionListener(this);
-		
-		this.add(DepositButton);
-	}
-	
-	private void initWithdrawlButton() {	
-		WithdrawlButton = new JButton("Withdrawl");
-		WithdrawlButton.setBounds(20, 60, 120, 35);
-		WithdrawlButton.addActionListener(this);
-		
-		this.add(WithdrawlButton);
-	}
-	
-	private void initTransferButton() {	
+		thirdRow.add(DepositButton);
+		WithdrawButton = new JButton("Withdraw");
+		WithdrawButton.addActionListener(this);
+		thirdRow.add(WithdrawButton);
 		TransferButton = new JButton("Transfer");
-		TransferButton.setBounds(20, 110, 120, 35);
 		TransferButton.addActionListener(this);
+		thirdRow.add(TransferButton);
+		this.add(thirdRow);
 		
-		this.add(TransferButton);
-	}
-	
-	private void initInfoButton() {	
-		InfoButton = new JButton("Personal Info");
-		InfoButton.setBounds(20, 160, 120, 35);
+		this.add(Box.createVerticalStrut(50));
+		Box lastRow = new Box(BoxLayout.X_AXIS);
+		InfoButton = new JButton("View/Edit Personal Information");
 		InfoButton.addActionListener(this);
+		lastRow.add(InfoButton);
+		this.add(lastRow);
 		
-		this.add(InfoButton);
-	}
-	
-	private void initCloseButton() {	
+		this.add(Box.createVerticalStrut(50));
+		Box CloseRow = new Box(BoxLayout.X_AXIS);
 		CloseButton = new JButton("Close Account");
-		CloseButton.setBounds(20, 210, 120, 35);
 		CloseButton.addActionListener(this);
-		
-		this.add(CloseButton);
-	}
-	
-	private void initLogoutButton() {	
-		logoutButton = new JButton("Log Out");
-		logoutButton.setBounds(20, 260, 120, 35);
-		logoutButton.addActionListener(this);
-		
-		this.add(logoutButton);
-	}
-	
-	private void initwelcomeMessage() {
-		welcomeMessage  = new JLabel("");
-		welcomeMessage.setBounds(150, 10, 300, 35);
-		
-		this.add(welcomeMessage);
-	}
-	
-	private void initInfoLabel() {
-		infoLabel  = new JLabel("");
-		infoLabel.setBounds(150, 50, 300, 35);
-		
-		this.add(infoLabel);
-	}
-	
+		CloseRow.add(CloseButton);
+		this.add(CloseRow);
+		this.add(Box.createVerticalGlue());
+	}	
 	/*
 	 * HomeView is not designed to be serialized, and attempts to serialize will throw an IOException.
 	 * 
@@ -150,40 +118,49 @@ public class HomeView extends JPanel implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
 		Object source = e.getSource();
+		if(source.equals(logOutButton)) {
+			this.account = null;
+			manager.logOut();	
+		}
 		
-		if (source.equals(DepositButton)) {
-			manager.sendBankAccount(account, "deposit");
+		else if (source.equals(DepositButton)) {
 			manager.switchTo(ATM.DEPOSIT_VIEW);
 		}
-		else if (source.equals(WithdrawlButton)) {
-			manager.sendBankAccount(account, "withdraw");
-			manager.switchTo(ATM.WITHDRAWL_VIEW);
+		else if (source.equals(WithdrawButton)) {
+			manager.switchTo(ATM.WITHDRAW_VIEW);
 		}
+		
 		else if (source.equals(TransferButton)) {
-			manager.sendBankAccount(account, "transfer");
-			manager.switchTo(ATM.TRANSFER_VIEW);
+			manager.switchTo(ATM.TRANSFER_VIEW);		
 		}
 		else if (source.equals(InfoButton)) {
-			manager.sendBankAccount(account, "info");
 			manager.switchTo(ATM.INFORMATION_VIEW);
 		}
 		else if (source.equals(CloseButton)) {
-			manager.closeAccount();
-			manager.switchTo(ATM.LOGIN_VIEW);
+			int choice = JOptionPane.showConfirmDialog(
+					this, "Are you sure?",
+					"Close Account",
+					JOptionPane.YES_NO_OPTION,
+					JOptionPane.QUESTION_MESSAGE
+				);
+
+				if (choice == 0) {
+					manager.closeAccount();
+				}
+
 		}
-		else if (source.equals(logoutButton)) {
-			int choice = JOptionPane.showConfirmDialog(null,"Are you sure you would like to logout?", "Confirmation", JOptionPane.YES_NO_OPTION);
-			if (choice == 0) {
-				manager.switchTo(ATM.LOGIN_VIEW);
-			}
-			else {
-				manager.switchTo(ATM.HOME_VIEW);
-			}
-		}
-		else {
-			System.err.println("ERROR: Action command not found (" + e.getActionCommand() + ")");
-		}
+
+	}
+		
+	public void setAccount(BankAccount account) {
+		this.account = account;
+		if (this.account != null) {
+			String welcome = String.format("Welcome %s %s!", account.getUser().getFirstName(), account.getUser().getLastName());
+			welcomeText.setText(welcome);
+			
+			String info = String.format("Account Number: %d, Balance: $%.2f", account.getAccountNumber(), account.getBalance());
+			InfoText.setText(info);
+		} 
 	}
 }

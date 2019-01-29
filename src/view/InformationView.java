@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
@@ -22,13 +21,13 @@ import model.User;
 import model.BankAccount;
 
 @SuppressWarnings("serial")
-public class CreateView extends JPanel implements ActionListener {
+public class InformationView extends JPanel implements ActionListener {
 	
 	private ViewManager manager;		// manages interactions between the views, model, and database
 	
 	private JLabel errorMessageLabel;
-	private JButton cancelButton;
-	private JButton createButton;
+	private JButton BackButton;
+	private JButton EditButton;
 
 	private JTextField firstName;
 	private JTextField lastName;
@@ -46,13 +45,15 @@ public class CreateView extends JPanel implements ActionListener {
 	private JTextField postal;
 	private JPasswordField pinField;
 	
+	private long accountNum;
+	private double accountBal;
 	/**
 	 * Constructs an instance (or object) of the CreateView class.
 	 * 
 	 * @param manager
 	 */
 	
-	public CreateView(ViewManager manager) {
+	public InformationView(ViewManager manager) {
 		super();
 		
 		this.manager = manager;
@@ -69,21 +70,59 @@ public class CreateView extends JPanel implements ActionListener {
 		this.setLayout(null);
 		
 		initFirstNameField();
+		firstName.setEnabled(false);
 		initLastNameField();
+		lastName.setEnabled(false);
 		initBirthdayFields();
+		day.setEnabled(false);
+		month.setEnabled(false);
+		year.setEnabled(false);
 		initPhoneField();
+		phone1.setEnabled(false);
+		phone2.setEnabled(false);
+		phone3.setEnabled(false);
 		initAddressField();
+		address.setEnabled(false);
 		initCityField();
+		city.setEnabled(false);
 		initStateField();
+		state.setEnabled(false);
 		initPostalField();
+		postal.setEnabled(false);
 		initPinField();
+		pinField.setEnabled(false);
 		initButtons();
 		
-		errorMessageLabel = new JLabel("Welcome to the CreateView!", SwingConstants.CENTER);
+		errorMessageLabel = new JLabel("Welcome to the Information View!", SwingConstants.CENTER);
 		errorMessageLabel.setBounds(36, 400, 338, 35);
 		this.add(errorMessageLabel);
 	}
 	
+	public void switchingToInformationView(BankAccount account) {
+		accountNum = account.getAccountNumber();
+		accountBal = account.getBalance();
+		
+		firstName.setText(account.getUser().getFirstName());
+		lastName.setText(account.getUser().getLastName());
+		
+		int dobInt = account.getUser().getDob();
+		String dob = String.valueOf(dobInt);
+		day.setSelectedIndex(Integer.parseInt(dob.substring(6)));
+		month.setSelectedIndex(Integer.parseInt(dob.substring(4, 6)));
+		year.setSelectedIndex(Integer.parseInt(dob.substring(0, 4))-1899);
+
+		long phoneLong = account.getUser().getPhone();
+		String phone = String.valueOf(phoneLong);
+		phone1.setText(phone.substring(0, 3));
+		phone2.setText(phone.substring(3, 6));
+		phone3.setText(phone.substring(6));
+
+		address.setText(account.getUser().getStreetAddress());
+		city.setText(account.getUser().getCity());
+		state.setSelectedItem(account.getUser().getState());
+		postal.setText(account.getUser().getZip());
+		pinField.setText(String.valueOf(account.getUser().getPin()));
+	}
 	private void initFirstNameField() {
 		JLabel label = new JLabel("First Name", SwingConstants.RIGHT);
 		label.setBounds(5, 5, 100, 35);
@@ -224,16 +263,16 @@ public class CreateView extends JPanel implements ActionListener {
 	}
 	
 	private void initButtons() {	
-		createButton = new JButton("Create Account");
-		createButton.setBounds(106, 360, 140, 35);
-		createButton.addActionListener(this);
+		EditButton = new JButton("Edit");
+		EditButton.setBounds(106, 360, 140, 35);
+		EditButton.addActionListener(this);
 		
-		cancelButton = new JButton("Cancel");
-		cancelButton.setBounds(254, 360, 120, 35);
-		cancelButton.addActionListener(this);
+		BackButton = new JButton("Return");
+		BackButton.setBounds(254, 360, 120, 35);
+		BackButton.addActionListener(this);
 
-		this.add(cancelButton);
-		this.add(createButton);
+		this.add(EditButton);
+		this.add(BackButton);
 	}
 
 
@@ -260,99 +299,109 @@ public class CreateView extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 		
-		if (source.equals(cancelButton)) {
-			manager.switchTo(ATM.LOGIN_VIEW);
+		if (source.equals(BackButton)) {
+			manager.switchTo(ATM.HOME_VIEW);
 			this.removeAll();
-			initialize();
-		} else if(source.equals(createButton)) {
-			boolean create = true;
-
-			String first = firstName.getText();
-			String last = firstName.getText();
-			if (first.equals(null) || last.equals(null) || first.length() > 15 || last.length() > 20) {
-				errorMessageLabel.setText("Name Formatted Incorrectly");
-				create = false;
-			} 
-			
-			int dob = 0;
-			if (year.getSelectedIndex() != 0 && day.getSelectedIndex() != 0 && month.getSelectedIndex() != 0) {
-				String yr = String.valueOf(year.getSelectedIndex()+1899);
-				String mon = String.valueOf(month.getSelectedIndex());
-				if (mon.length() != 2) {
-					mon = 0 + mon;
-				}
-				String dy = String.valueOf(day.getSelectedIndex());
-				if (dy.length() != 2) {
-					dy = 0 + dy;
-				}
-				dob = Integer.parseInt(yr+mon+dy);
+			this.initialize();
+		} else if(source.equals(EditButton)) {
+			if(EditButton.getText().equals("Edit")) {
+				address.setEnabled(true);
+				city.setEnabled(true);
+				state.setEnabled(true);
+				postal.setEnabled(true);
+				
+				phone1.setEnabled(true);
+				phone2.setEnabled(true);
+				phone3.setEnabled(true);
+				
+				pinField.setEnabled(true);
+				
+				EditButton.setText("Save");
 			} else {
-				errorMessageLabel.setText("Fill in all fields (Birthday missing)");
-				create = false;
+				boolean create = true;
 
-			}
-			long phone = 0;
-			if( !phone1.getText().matches("\\d{3}") || !phone2.getText().matches("\\d{3}") || !phone3.getText().matches("\\d{4}")) {
-				errorMessageLabel.setText("Phone Number Formatted Incorrectly");
-				create = false;
-			} else {
-				phone = Long.parseLong((phone1.getText()+phone2.getText()+phone3.getText()));
-			}
-			
-			
-			String a = address.getText();
-			String c = city.getText();
-			String s = state.getItemAt(state.getSelectedIndex());
-			String zip = postal.getText();
-			//TODO -- check if postal is numeric
-			if(a.equals(null) || c.equals(null) || s.equals("") || !zip.matches("\\d{5}") || a.length() > 30 || c.length() > 30 || zip.length() != 5) {
-				errorMessageLabel.setText("Residency Formatted Incorrectly (City, State, Street, Zip)");
-				create = false;
-			}
-			
-			char[] pinChars = null;
-			if(!pinField.getPassword().equals(null)) {
-				pinChars= pinField.getPassword();
-				for( char digit : pinChars) {
-					if (!Character.isDigit(digit)) {
-						errorMessageLabel.setText("PIN Formatted Incorrectly");
+				String first = firstName.getText();
+				String last = firstName.getText();
+				if (first.equals(null) || last.equals(null) || first.length() > 15 || last.length() > 20) {
+					errorMessageLabel.setText("Name Formatted Incorrectly");
+					create = false;
+				} 
+				
+				int dob = 0;
+				if (year.getSelectedIndex() != 0 && day.getSelectedIndex() != 0 && month.getSelectedIndex() != 0) {
+					String yr = String.valueOf(year.getSelectedIndex()+1899);
+					String mon = String.valueOf(month.getSelectedIndex());
+					if (mon.length() != 2) {
+						mon = 0 + mon;
+					}
+					String dy = String.valueOf(day.getSelectedIndex());
+					if (dy.length() != 2) {
+						dy = 0 + dy;
+					}
+					dob = Integer.parseInt(yr+mon+dy);
+				} else {
+					errorMessageLabel.setText("Fill in all fields (Birthday missing)");
+					create = false;
+
+				}
+				long phone = 0;
+				if( !phone1.getText().matches("\\d{3}") || !phone2.getText().matches("\\d{3}") || !phone3.getText().matches("\\d{4}")) {
+					errorMessageLabel.setText("Phone Number Formatted Incorrectly");
+					create = false;
+				} else {
+					phone = Long.parseLong((phone1.getText()+phone2.getText()+phone3.getText()));
+				}
+				
+				
+				String a = address.getText();
+				String c = city.getText();
+				String s = state.getItemAt(state.getSelectedIndex());
+				String zip = postal.getText();
+				if(a.equals(null) || c.equals(null) || s.equals("") || !zip.matches("\\d{5}") || a.length() > 30 || c.length() > 30 || zip.length() != 5) {
+					errorMessageLabel.setText("Residency Formatted Incorrectly (City, State, Street, Zip)");
+					create = false;
+				}
+				
+				char[] pinChars = null;
+				if(!pinField.getPassword().equals(null)) {
+					pinChars= pinField.getPassword();
+					for( char digit : pinChars) {
+						if (!Character.isDigit(digit)) {
+							errorMessageLabel.setText("PIN Formatted Incorrectly");
+							create = false;
+						}
+					}
+					if (pinChars.length != 4) {
+						errorMessageLabel.setText("PIN must be exactly 4 numbers long");
 						create = false;
 					}
 				}
-				if (pinChars.length != 4) {
-					errorMessageLabel.setText("PIN must be exactly 4 numbers long");
-					create = false;
+								
+				if(create) {
+					String pinString = "";
+					for (char ch : pinChars) {
+						pinString += ch;
+					}
+					int pin = Integer.parseInt(pinString); 
+					User user = new User(pin, dob, phone, first, last, a, c, s, zip);
+					BankAccount acc = new BankAccount('Y',accountNum,accountBal,user);
+					manager.updateAccount(acc);
+					
+					
+					EditButton.setText("Edit");
+					address.setEnabled(false);
+					city.setEnabled(false);
+					state.setEnabled(false);
+					postal.setEnabled(false);
+					
+					phone1.setEnabled(false);
+					phone2.setEnabled(false);
+					phone3.setEnabled(false);
+					
+					pinField.setEnabled(false);
 				}
 			}
 			
-			long num = 0;
-			try {
-				num = manager.maxAccountNumber()+1;
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			
-			if(create) {
-				String pinString = "";
-				for (char ch : pinChars) {
-					pinString += ch;
-				}
-				int pin = Integer.parseInt(pinString); 
-				User user = new User(pin, dob, phone, first, last, a, c, s, zip);
-				BankAccount acc = new BankAccount('Y',num,0,user);
-				manager.insertAccount_wrapp(acc);
-				manager.login(String.valueOf(num), pinChars);
-				this.removeAll();
-				initialize();
-			}
 		}
-		
-		// TODO
-		//
-		// this is where you'll setup your action listener, which is responsible for
-		// responding to actions the user might take in this view (an action can be a
-		// user clicking a button, typing in a textfield, etc.).
-		//
-		// feel free to use my action listener in LoginView.java as an example.
 	}
 }
